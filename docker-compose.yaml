@@ -1,0 +1,45 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: ./php-api/Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./php-api:/var/www/html
+    networks:
+      - react-php-network
+    depends_on:
+      - db
+
+  react:
+    build:
+      context: .
+      dockerfile: ./php-api/Dockerfile
+    image: node:20
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./react-app:/app
+    command: sh -c "npm install && npm start"
+    networks:
+      - react-php-network
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: react_crud
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpass
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db-data:/var/lib/mysql
+    networks:
+      - react-php-network
+
+networks:
+  react-php-network:
+    driver: bridge
